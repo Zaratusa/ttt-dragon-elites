@@ -65,8 +65,8 @@ function SWEP:Initialize()
 			local diff = CurTime() - self.LastShot
 			local shotsfired = self:GetNWInt("ShotsFired")
 			if (diff > 1.25 and shotsfired > math.Rand(5, 7)) then
-				if (IsValid(self.Owner) and self.Owner:GetActiveWeapon() == self.Weapon) then
-					local viewmodel = self.Owner:GetViewModel()
+				if (IsValid(self:GetOwner()) and self:GetOwner():GetActiveWeapon() == self) then
+					local viewmodel = self:GetOwner():GetViewModel()
 					ParticleEffectAttach("smoke_trail", PATTACH_POINT_FOLLOW, viewmodel, 1)
 					ParticleEffectAttach("smoke_trail", PATTACH_POINT_FOLLOW, viewmodel, 2)
 					self:SetNWInt("ShotsFired", 0)
@@ -83,7 +83,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 		self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 
-		local owner = self.Owner
+		local owner = self:GetOwner()
 		owner:GetViewModel():StopParticles()
 
 		if SERVER then
@@ -120,18 +120,18 @@ function SWEP:ShootEffects()
 		end
 	end
 
-	local viewModel = self.Owner:GetViewModel()
+	local viewModel = self:GetOwner():GetViewModel()
 	viewModel:ResetSequence(viewModel:LookupSequence(sequence))
 	self.AnimateRight = !self.AnimateRight
 
-	self.Owner:MuzzleFlash()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():MuzzleFlash()
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:Reload()
-	if (self:Clip1() < self.Primary.ClipSize and self.Owner:GetAmmoCount(self.Primary.Ammo) > 0) then
+	if (self:Clip1() < self.Primary.ClipSize and self:GetOwner():GetAmmoCount(self.Primary.Ammo) > 0) then
 		self:DefaultReload(ACT_VM_RELOAD)
-		timer.Simple(0.2, function() if (IsValid(self) and IsValid(self.Owner)) then self.Owner:GetViewModel():StopParticles() end end)
+		timer.Simple(0.2, function() if (IsValid(self) and IsValid(self:GetOwner())) then self:GetOwner():GetViewModel():StopParticles() end end)
 	end
 end
 
@@ -141,8 +141,8 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
-	if (IsValid(self.Owner)) then
-		local vm = self.Owner:GetViewModel()
+	if (IsValid(self:GetOwner())) then
+		local vm = self:GetOwner():GetViewModel()
 		if (IsValid(vm)) then
 			vm:StopParticles()
 		end

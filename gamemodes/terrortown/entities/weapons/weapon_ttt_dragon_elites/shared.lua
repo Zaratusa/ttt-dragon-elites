@@ -84,7 +84,7 @@ function SWEP:Initialize()
 		self.fingerprints = {}
 		self:SetIronsights(false)
 		-- aditional magazine, seems to be bugged, when using DefaultClip
-		timer.Simple(0.1, function() if (IsValid(self.Owner)) then self.Owner:GiveAmmo(30, "pistol", false) end end)
+		timer.Simple(0.1, function() if (IsValid(self:GetOwner())) then self:GetOwner():GiveAmmo(30, "pistol", false) end end)
 	end
 
 	self:SetDeploySpeed(self.DeploySpeed)
@@ -105,8 +105,8 @@ function SWEP:Initialize()
 			local diff = CurTime() - self.LastShot
 			local shotsfired = self:GetNWInt("ShotsFired")
 			if (diff > 1.25 and shotsfired > math.Rand(5, 7)) then
-				if (IsValid(self.Owner) and self.Owner:GetActiveWeapon() == self.Weapon) then
-					local viewmodel = self.Owner:GetViewModel()
+				if (IsValid(self:GetOwner()) and self:GetOwner():GetActiveWeapon() == self) then
+					local viewmodel = self:GetOwner():GetViewModel()
 					ParticleEffectAttach("smoke_trail", PATTACH_POINT_FOLLOW, viewmodel, 1)
 					ParticleEffectAttach("smoke_trail", PATTACH_POINT_FOLLOW, viewmodel, 2)
 					self:SetNWInt("ShotsFired", 0)
@@ -123,7 +123,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 		self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 
-		local owner = self.Owner
+		local owner = self:GetOwner()
 		owner:GetViewModel():StopParticles()
 
 		if SERVER then
@@ -154,8 +154,8 @@ function SWEP:ShootBullet(dmg, recoil, numbul, cone)
 
 		local bullet = {}
 		bullet.Num = numbul
-		bullet.Src = self.Owner:GetShootPos()
-		bullet.Dir = self.Owner:GetAimVector()
+		bullet.Src = self:GetOwner():GetShootPos()
+		bullet.Dir = self:GetOwner():GetAimVector()
 		bullet.Spread = Vector( cone, cone, 0 )
 		bullet.Tracer = 4
 		bullet.TracerName = self.Tracer or "Tracer"
@@ -165,18 +165,18 @@ function SWEP:ShootBullet(dmg, recoil, numbul, cone)
 			bullet.Callback = Sparklies
 		end
 
-		self.Owner:FireBullets(bullet)
+		self:GetOwner():FireBullets(bullet)
 
 		-- owner can die after firebullets
-		if (IsValid(self.Owner) and self.Owner:Alive() and (!self.Owner:IsNPC())
+		if (IsValid(self:GetOwner()) and self:GetOwner():Alive() and (!self:GetOwner():IsNPC())
 			and ((game.SinglePlayer() and SERVER)
 				or ((!game.SinglePlayer()) and CLIENT and IsFirstTimePredicted()))) then
 			-- reduce recoil if ironsighting
 			recoil = sights and (recoil * 0.6) or recoil
 
-			local eyeang = self.Owner:EyeAngles()
+			local eyeang = self:GetOwner():EyeAngles()
 			eyeang.pitch = eyeang.pitch - recoil
-			self.Owner:SetEyeAngles(eyeang)
+			self:GetOwner():SetEyeAngles(eyeang)
 		end
 	end
 end
@@ -198,18 +198,18 @@ function SWEP:ShootEffects()
 		end
 	end
 
-	local viewModel = self.Owner:GetViewModel()
+	local viewModel = self:GetOwner():GetViewModel()
 	viewModel:ResetSequence(viewModel:LookupSequence(sequence))
 	self.AnimateRight = !self.AnimateRight
 
-	self.Owner:MuzzleFlash()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():MuzzleFlash()
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:Reload()
-	if (self:Clip1() < self.Primary.ClipSize and self.Owner:GetAmmoCount(self.Primary.Ammo) > 0) then
+	if (self:Clip1() < self.Primary.ClipSize and self:GetOwner():GetAmmoCount(self.Primary.Ammo) > 0) then
 		self:DefaultReload(ACT_VM_RELOAD)
-		timer.Simple(0.2, function() if (IsValid(self) and IsValid(self.Owner)) then self.Owner:GetViewModel():StopParticles() end end)
+		timer.Simple(0.2, function() if (IsValid(self) and IsValid(self:GetOwner())) then self:GetOwner():GetViewModel():StopParticles() end end)
 	end
 end
 
@@ -219,8 +219,8 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
-	if (IsValid(self.Owner)) then
-		local vm = self.Owner:GetViewModel()
+	if (IsValid(self:GetOwner())) then
+		local vm = self:GetOwner():GetViewModel()
 		if (IsValid(vm)) then
 			vm:StopParticles()
 		end
