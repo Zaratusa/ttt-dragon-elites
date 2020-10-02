@@ -8,6 +8,9 @@ if SERVER then
 else
 	LANG.AddToLanguage("english", "dragon_elites_name", "Dragon Elites")
 	LANG.AddToLanguage("english", "dragon_elites_desc", "Dual Dragon Elites,\nwith one additional magazine.\n\nGet the Style.")
+	
+	LANG.AddToLanguage("Русский", "dragon_elites_name", "Dragon Elites")
+	LANG.AddToLanguage("Русский", "dragon_elites_desc", "Два Dragon Elites,\nс одним дополнительным магазином.\n\nНа стиле.")
 
 	SWEP.PrintName = "dragon_elites_name"
 	SWEP.Slot = 1
